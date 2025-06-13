@@ -2,12 +2,12 @@
 import os
 import requests
 from dotenv import load_dotenv
-from chromadb import PersistentClient
+import chromadb
 from embedder import OpenAIEmbedder
 
 load_dotenv()
 
-chroma = PersistentClient(path="chroma_db")
+chroma = chromadb.Client()
 embedder = OpenAIEmbedder()
 
 collection = chroma.get_or_create_collection(
