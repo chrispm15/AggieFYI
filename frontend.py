@@ -5,7 +5,7 @@ import openai
 from dotenv import load_dotenv
 from ingest import ingest_all
 from embedder import OpenAIEmbedder
-from chromadb import PersistentClient
+import chromadb
 
 # Load env vars and OpenAI key
 load_dotenv()
@@ -53,7 +53,7 @@ if "history" not in st.session_state:
 
 # Load ChromaDB and collection once
 if "collection" not in st.session_state:
-    chroma = PersistentClient(path="chroma_db")
+    chroma = chromadb.Client()
     embedder = OpenAIEmbedder()
     st.session_state.collection = chroma.get_or_create_collection(name="tamu_data", embedding_function=embedder)
 
