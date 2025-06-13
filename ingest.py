@@ -42,10 +42,6 @@ def fetch_roster():
     return res.json()
 
 
-schedule2024 = fetch_schedule2024()
-schedule2025 = fetch_schedule2025()
-roster = fetch_roster()
-
 # Format schedules
 schedule_2024 = "\n".join([
     f"{game['week']} - {game['homeTeam']} vs {game['awayTeam']}"
@@ -91,5 +87,9 @@ docs = [
 ]
 ids = ["rules", "facts", "2024schedule", "2024roster", "2025schedule"]
 
-collection.upsert(documents=docs, ids=ids)
-print("✅ Ingestion complete")
+def ingest_all():
+    schedule2024 = fetch_schedule2024()
+    schedule2025 = fetch_schedule2025()
+    roster = fetch_roster()
+    collection.upsert(documents=docs, ids=ids)
+    print("✅ Ingestion complete")
