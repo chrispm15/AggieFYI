@@ -1,5 +1,6 @@
 # backend.py
 import os
+import streamlit as st
 import openai
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +9,7 @@ from chromadb import PersistentClient
 from embedder import OpenAIEmbedder
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 app = FastAPI()
 
