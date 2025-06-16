@@ -62,7 +62,7 @@ if user_input:
     # Show spinner and get assistant response
     with st.spinner("Thinking..."):
         try:
-            res = requests.post("https://aggiefyi.onrender.com", json={"message": user_input})
+            res = requests.post("https://aggiefyi.onrender.com/chat", json={"message": user_input})
             res.raise_for_status()
             data = res.json()
             reply = data.get("response", "[No reply received]")
