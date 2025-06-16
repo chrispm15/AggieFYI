@@ -2,10 +2,9 @@
 import os
 import openai
 from dotenv import load_dotenv
-import streamlit as st
 
 load_dotenv()
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class OpenAIEmbedder:
     def __init__(self, model="text-embedding-3-small"):
