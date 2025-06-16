@@ -1,18 +1,7 @@
 # frontend.py
 import streamlit as st
-import os
-import openai
-from dotenv import load_dotenv
-from ingest import ingest_all
-from embedder import OpenAIEmbedder
-import chromadb
+import requests
 
-# Load env vars and OpenAI key
-load_dotenv()
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
-# Run ingestion
-ingest_all()
 
 # Set up page config
 st.set_page_config(page_title="Texas A&M Chat", layout="centered")
@@ -43,6 +32,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+
+
 # Header
 st.markdown("<h1 style='color:#500000;'>Texas A&M Athletics Assistant</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#363636;'>Ask anything about Texas A&M Football</p>", unsafe_allow_html=True)
@@ -51,43 +42,37 @@ st.markdown("<p style='color:#363636;'>Ask anything about Texas A&M Football</p>
 if "history" not in st.session_state:
     st.session_state.history = [{"role": "assistant", "content": "Howdy, what's on your mind?"}]
 
-# Load ChromaDB and collection once
-if "collection" not in st.session_state:
-    chroma = chromadb.Client()
-    embedder = OpenAIEmbedder()
-    st.session_state.collection = chroma.get_or_create_collection(name="tamu_data", embedding_function=embedder)
-
 # Render chat history
 for chat in st.session_state.history:
     if chat["role"] == "user":
-        st.chat_message("user", avatar="🧑").write(chat["content"])
+        st.chat_message("user", avatar="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShhpeGUQdo2u3Gqihqdz97NkpwPdGeNZMuiA&s").write(chat["content"])
     else:
-        st.chat_message("assistant", avatar="🤠").write(chat["content"])
+        st.chat_message("assistant", avatar='https://pbs.twimg.com/profile_images/1567934217719320576/Ni7dxbry_400x400.jpg').write(chat["content"])
 
 # Chat input
 user_input = st.chat_input("Type your question here...")
 
 if user_input:
-    st.chat_message("user", avatar="🧑").write(user_input)
+    # Show user's message immediately
+    st.chat_message("user", avatar="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShhpeGUQdo2u3Gqihqdz97NkpwPdGeNZMuiA&s").write(user_input)
+
+    # Add user message to history
     st.session_state.history.append({"role": "user", "content": user_input})
 
+    # Show spinner and get assistant response
     with st.spinner("Thinking..."):
-        # Query ChromaDB
-        results = st.session_state.collection.query(query_texts=[user_input], n_results=5)
-        context = "\n---\n".join(results["documents"][0])
-        prompt = f"{context}\n\nUser: {user_input}\nAI:"
-
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are a friendly Texas A&M football assistant. Keep it casual and helpful."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            reply = response["choices"][0]["message"]["content"].strip()
+            res = requests.post("http://localhost:8000/chat", json={"message": user_input})
+            res.raise_for_status()
+            data = res.json()
+            reply = data.get("response", "[No reply received]")
         except Exception as e:
-            reply = f"[OpenAI error]: {e}"
+            reply = f"[Backend error]: {e}"
 
-    st.chat_message("assistant", avatar="🤠").write(reply)
+    # Show assistant response
+    st.chat_message("assistant", avatar="https://pbs.twimg.com/profile_images/1567934217719320576/Ni7dxbry_400x400.jpg").write(reply)
+
+    # Add assistant reply to history
     st.session_state.history.append({"role": "assistant", "content": reply})
+
+
