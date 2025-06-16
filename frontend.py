@@ -4,6 +4,17 @@ import requests
 from streamlit.components.v1 import html
 
 
+
+html("""
+    <head>
+        <meta property="og:title" content="Aggie.FYI" />
+        <meta property="og:description" content="Ask anything about Texas A&M Athletics" />
+        <meta property="og:image" content="https://raw.githubusercontent.com/chrispm15/AggieFYI/main/static/img.png" />
+        <meta property="og:url" content="https://www.aggie.fyi" />
+        <meta name="twitter:card" content="summary_large_image" />
+    </head>
+""", height=0)
+
 # Set up page config
 st.set_page_config(
     page_title="Aggie FYI",
@@ -19,16 +30,6 @@ hide_streamlit_style = """
 """
 
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-html("""
-    <head>
-        <meta property="og:title" content="Aggie.FYI" />
-        <meta property="og:description" content="Ask anything about Texas A&M Athletics" />
-        <meta property="og:image" content="https://www.aggie.fyi/static/img.png" />
-        <meta property="og:url" content="https://www.aggie.fyi" />
-        <meta name="twitter:card" content="summary_large_image" />
-    </head>
-""", height=0)
 
 # Custom styling
 st.markdown("""
