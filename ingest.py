@@ -2,12 +2,12 @@
 import os
 import requests
 from dotenv import load_dotenv
-import chromadb
+from chromadb import PersistentClient
 from embedder import OpenAIEmbedder
 
 load_dotenv()
 
-chroma = chromadb.Client()
+chroma = PersistentClient(path="chroma_db")
 embedder = OpenAIEmbedder()
 
 collection = chroma.get_or_create_collection(
@@ -41,6 +41,10 @@ def fetch_roster():
     )
     return res.json()
 
+
+schedule2024 = fetch_schedule2024()
+schedule2025 = fetch_schedule2025()
+roster = fetch_roster()
 
 # Format schedules
 schedule_2024 = "\n".join([
@@ -87,9 +91,5 @@ docs = [
 ]
 ids = ["rules", "facts", "2024schedule", "2024roster", "2025schedule"]
 
-def ingest_all():
-    schedule2024 = fetch_schedule2024()
-    schedule2025 = fetch_schedule2025()
-    roster = fetch_roster()
-    collection.upsert(documents=docs, ids=ids)
-    print("✅ Ingestion complete")
+collection.upsert(documents=docs, ids=ids)
+print("✅ Ingestion complete")
