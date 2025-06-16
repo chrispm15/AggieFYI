@@ -4,6 +4,11 @@ import requests
 from streamlit.components.v1 import html
 
 
+# Set up page config
+st.set_page_config(
+    page_title="Aggie FYI",
+    page_icon="👍",  # You can use an emoji or a URL to an image
+)
 
 html("""
     <head>
@@ -15,11 +20,6 @@ html("""
     </head>
 """, height=0)
 
-# Set up page config
-st.set_page_config(
-    page_title="Aggie FYI",
-    page_icon="👍",  # You can use an emoji or a URL to an image
-)
 
 hide_streamlit_style = """
     <style>
