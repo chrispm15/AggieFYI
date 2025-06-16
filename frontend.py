@@ -1,10 +1,21 @@
 # frontend.py
 import streamlit as st
 import requests
+from streamlit.components.v1 import html
 
 
 # Set up page config
-st.set_page_config(page_title="Texas A&M Chat", layout="centered")
+st.set_page_config(page_title="Aggie.FYI", layout="centered")
+
+html("""
+    <head>
+        <meta property="og:title" content="Aggie.FYI" />
+        <meta property="og:description" content="Texas A&M Athletics AI Assistant" />
+        <meta property="og:image" content="https://www.aggie.fyi/static/img.png" />
+        <meta property="og:url" content="https://www.aggie.fyi" />
+        <meta name="twitter:card" content="summary_large_image" />
+    </head>
+""", height=0)
 
 # Custom styling
 st.markdown("""
