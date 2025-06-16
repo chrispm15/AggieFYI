@@ -1,22 +1,23 @@
-# embedder.py
-import os
 import openai
+import numpy as np
+import os
 from dotenv import load_dotenv
-
 load_dotenv()
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
 class OpenAIEmbedder:
-    def __init__(self, model="text-embedding-3-small"):
-        self.model = model
-
     def __call__(self, input):
-        if isinstance(input, str):
-            input = [input]
-        response = openai.Embedding.create(input=input, model=self.model)
-        embeddings = [r["embedding"] for r in response["data"]]
-        print(f"🔎 EMBEDDING DIM: {len(embeddings[0])}")
-        return embeddings
+        response = openai.Embedding.create(
+            model="text-embedding-3-small",
+            input=input
+        )
+        raw = [r["embedding"] for r in response["data"]]
+        normalized = [self._normalize(vec) for vec in raw]
+        return normalized
+
+    def _normalize(self, vec):
+        norm = np.linalg.norm(vec)
+        return [v / norm for v in vec] if norm > 0 else vec
 
     def name(self):
-        return self.model
+        return "openai-embedding-3-small"
