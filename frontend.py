@@ -10,10 +10,20 @@ st.set_page_config(
     page_icon="👍",  # You can use an emoji or a URL to an image
 )
 
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+"""
+
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 html("""
     <head>
         <meta property="og:title" content="Aggie.FYI" />
-        <meta property="og:description" content="Texas A&M Athletics AI Assistant" />
+        <meta property="og:description" content="Ask anything about Texas A&M Athletics" />
         <meta property="og:image" content="https://www.aggie.fyi/static/img.png" />
         <meta property="og:url" content="https://www.aggie.fyi" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -49,8 +59,8 @@ st.markdown("""
 
 
 # Header
-st.markdown("<h1 style='color:#500000;'>Texas A&M Athletics Assistant</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#363636;'>Ask anything about Texas A&M Football</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='color:#500000;'>Aggie.FYI</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color:#363636;'>Ask anything about Texas A&M Athletics</p>", unsafe_allow_html=True)
 
 # Chat session state
 if "history" not in st.session_state:
@@ -74,7 +84,7 @@ if user_input:
     st.session_state.history.append({"role": "user", "content": user_input})
 
     # Show spinner and get assistant response
-    with st.spinner("Thinking..."):
+    with st.spinner("Asking Miss Rev..."):
         try:
             res = requests.post("https://aggiefyi.onrender.com/chat", json={"message": user_input})
             res.raise_for_status()
