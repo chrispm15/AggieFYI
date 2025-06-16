@@ -1,18 +1,55 @@
 # backend.py
 import os
-import openai
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+import openai
 from chromadb import PersistentClient
 from embedder import OpenAIEmbedder
+from search_and_scrape import run_search_and_summarize
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-# CORS for frontend
+
+
+EVALUATION_PROMPT = """
+You're an AI assistant. The user has sent a message, and you've been provided some internal context (such as documents, notes, or background info).
+Your job is to determine:
+
+- Is the user's message an actual information-seeking question?
+- AND does the context contain enough relevant information to answer it?
+
+If the message is small talk, a greeting, or doesn't require specific information, answer YES — context is sufficient.
+
+Only respond with one word: YES or NO.
+
+Context:
+{context}
+
+Message:
+{question}
+
+Answer:
+"""
+
+def gpt_should_fallback(question: str, context: str) -> bool:
+    prompt = EVALUATION_PROMPT.format(context=context[:3000], question=question)
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        answer = response["choices"][0]["message"]["content"].strip().lower()
+        print(f"[GPT Fallback Decision] {answer}")
+        return "no" in answer
+    except Exception as e:
+        print(f"[ERROR] GPT fallback check failed: {e}")
+        return False  # Be safe — fallback only if GPT explicitly says no
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,29 +58,51 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Chroma setup
 chroma = PersistentClient(path="chroma_db")
 embedder = OpenAIEmbedder()
-collection = chroma.get_or_create_collection(
-    name="tamu_data",
-    embedding_function=embedder
-)
+collection = chroma.get_or_create_collection(name="tamu_data", embedding_function=embedder)
+
+SIMILARITY_THRESHOLD = .6
 
 @app.post("/chat")
 async def chat(request: Request):
     body = await request.json()
-    user_msg = body.get("message", "")
+    user_msg = body.get("message", "").strip()
+    print(f"\n[USER] {user_msg}")
 
-    results = collection.query(query_texts=[user_msg], n_results=5)
-    context = "\n---\n".join(results["documents"][0])
+    # --- Chroma Phase ---
+    chroma_results = collection.query(query_texts=[user_msg], n_results=10)
+    docs = chroma_results["documents"][0]
+    distances = chroma_results["distances"][0]
+    SIMILARITY_THRESHOLD = 0.75  # You can tune this
 
-    prompt = f"{context}\n\nUser: {user_msg}\nAI:"
+    # Generate Chroma context
+    chroma_context = ""
+    for i, (doc, dist) in enumerate(zip(docs, distances)):
+        print(f"  -> Doc {i + 1} | Distance: {dist:.4f}")
+        chroma_context += f"\n[Chroma Doc {i + 1}] (Distance: {dist:.4f})\n{doc.strip()}\n"
+
+    # Let GPT decide if fallback is needed
+    should_fallback = gpt_should_fallback(user_msg, chroma_context)
+
+    search_context = ""
+    if should_fallback:
+        print("[INFO] Chroma results were weak. Falling back to Brave.")
+        summaries = run_search_and_summarize(user_msg)
+        for i, s in enumerate(summaries):
+            search_context += f"\n[Search Result {i + 1}]\n{s.strip()}\n"
+    else:
+        print("[INFO] Using Chroma only. No search needed.")
+
+    # --- Compose Prompt ---
+    full_context = f"[CHROMA RESULTS]\n{chroma_context.strip()}\n\n[WEB SEARCH RESULTS]\n{search_context.strip()}"
+    prompt = f"{full_context.strip()}\n\nUser: {user_msg}\nAI:"
 
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a friendly Texas A&M football assistant. Keep it casual and helpful."},
+                {"role": "system", "content": "You are a helpful assistant focused on Texas A&M athletics."},
                 {"role": "user", "content": prompt}
             ]
         )
@@ -51,4 +110,5 @@ async def chat(request: Request):
     except Exception as e:
         reply = f"[Error]: {str(e)}"
 
+    print(f"[RESPONSE] {reply[:250]}...\n")
     return {"response": reply}
