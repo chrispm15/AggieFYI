@@ -7,10 +7,12 @@ import openai
 from chromadb import PersistentClient
 from embedder import OpenAIEmbedder
 from search_and_scrape import run_search_and_summarize
+from datetime import datetime
+
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
+today = datetime.now().strftime("%m/%d/%Y")
 app = FastAPI()
 
 
@@ -68,7 +70,7 @@ SIMILARITY_THRESHOLD = .6
 async def chat(request: Request):
     body = await request.json()
     user_msg = body.get("message", "").strip()
-    print(f"\n[USER] {user_msg}")
+    print(f"\n[USER] {user_msg} [TODAY'S DATE={today}]")
 
     # --- Chroma Phase ---
     chroma_results = collection.query(query_texts=[user_msg], n_results=10)
@@ -96,7 +98,7 @@ async def chat(request: Request):
 
     # --- Compose Prompt ---
     full_context = f"[CHROMA RESULTS]\n{chroma_context.strip()}\n\n[WEB SEARCH RESULTS]\n{search_context.strip()}"
-    prompt = f"{full_context.strip()}\n\nUser: {user_msg}\nAI:"
+    prompt = f"{full_context.strip()}\n\nUser: {user_msg}\nToday's Date: {today}\nAI:"
 
     try:
         response = openai.ChatCompletion.create(
