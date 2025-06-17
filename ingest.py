@@ -4,6 +4,8 @@ import requests
 from dotenv import load_dotenv
 from chromadb import PersistentClient
 from embedder import OpenAIEmbedder
+from datetime import datetime
+import pytz
 
 load_dotenv()
 
@@ -43,6 +45,21 @@ def fetch_roster():
         headers={"Authorization": f"Bearer {os.getenv('CFBD_API_KEY')}"}
     )
     return res.json()
+
+def convert_to_central_time(utc_iso_str):
+    utc = pytz.utc
+    central = pytz.timezone("America/Chicago")
+
+    # Parse the ISO format with microseconds and 'Z'
+    utc_time = datetime.strptime(utc_iso_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+    utc_time = utc.localize(utc_time)
+    central_time = utc_time.astimezone(utc)
+
+    return central_time.strftime("%B %d")
+
+
+utc = pytz.utc
+central = pytz.timezone("America/Chicago")  # handles CST/CDT automatically
 
 print("📡 Fetching data...")
 schedule2024 = fetch_schedule2024()
@@ -88,12 +105,12 @@ for i, line in enumerate(facts.strip().split("\n")):
 
 # Chunk: each schedule game as its own doc
 for i, game in enumerate(schedule2024):
-    game_str = f"2024 Week {game['week']}: {game['homeTeam']} vs {game['awayTeam']}"
+    game_str = f"2024 Week {game['week']}: {game['homeTeam']} vs {game['awayTeam']} on {convert_to_central_time(game['startDate'])}"
     docs.append(game_str)
     ids.append(f"schedule_2024_{i}")
 
 for i, game in enumerate(schedule2025):
-    game_str = f"2025 Week {game['week']}: {game['homeTeam']} vs {game['awayTeam']}"
+    game_str = f"2025 Week {game['week']}: {game['homeTeam']} vs {game['awayTeam']} on {convert_to_central_time(game['startDate'])}"
     docs.append(game_str)
     ids.append(f"schedule_2025_{i}")
 
