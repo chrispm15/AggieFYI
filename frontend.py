@@ -47,6 +47,9 @@ st.markdown("""
             color: #2c2c2c !important;
         }
 
+        ul, ol, li {
+            color: #2c2c2c !important;
+
         .stChatMessage pre,
         .stChatMessage code,
         .stChatMessage p {
