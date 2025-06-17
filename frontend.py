@@ -47,10 +47,18 @@ st.markdown("""
             color: #2c2c2c !important;
         }
 
-        ul, ol, li, p, span, div, h1, h2, h3, h4, h5, h6,
-    code, pre, strong, em {
-            color: #2c2c2c !important;
+        .stMarkdown ul,
+        .stMarkdown ol,
+        .stMarkdown li,
+        .stMarkdown p,
+        .stChatMessage,
+        .stChatMessage p,
+        .stChatMessage pre,
+        .stChatMessage code {
+        color: #2c2c2c !important;
+        background-color: transparent !important;
         }
+        
         
         .stChatMessage pre,
         .stChatMessage code,
