@@ -14,7 +14,7 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 today = datetime.now().strftime("%m/%d/%Y")
 app = FastAPI()
-
+gptModel = 'gpt-3.5-turbo-0125'
 
 
 EVALUATION_PROMPT = """
@@ -41,7 +41,7 @@ def gpt_should_fallback(question: str, context: str) -> bool:
     prompt = EVALUATION_PROMPT.format(context=context[:3000], question=question)
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model=gptModel,
             messages=[{"role": "user", "content": prompt}]
         )
         answer = response["choices"][0]["message"]["content"].strip().lower()
@@ -102,7 +102,7 @@ async def chat(request: Request):
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model=gptModel,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant focused on Texas A&M athletics."},
                 {"role": "user", "content": prompt}
