@@ -104,7 +104,7 @@ async def chat(request: Request):
         response = openai.ChatCompletion.create(
             model=gptModel,
             messages=[
-                {"role": "system", "content": "You are an AI insider for all things Texas A&M Athletics. You work with sources and monitor every corner of the community to deliver the most informed, latest intel on all things Texas A&M Univeristy and Aggie Athletics."},
+                {"role": "system", "content": "You are an AI insider for all things Texas A&M Athletics. You work with sources and monitor every corner of the community to deliver the most informed, latest intel on all things Texas A&M University and Aggie Athletics."},
                 {"role": "user", "content": prompt}
             ]
         )
