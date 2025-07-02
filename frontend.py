@@ -13,7 +13,7 @@ st.set_page_config(
 html("""
     <head>
         <meta property="og:title" content="Aggie.FYI" />
-        <meta property="og:description" content="Ask anything about Texas A&M Athletics" />
+        <meta property="og:description" content="Your Texas A&M AI Insider" />
         <meta property="og:image" content="https://raw.githubusercontent.com/chrispm15/AggieFYI/main/static/img.png" />
         <meta property="og:url" content="https://www.aggie.fyi" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -74,7 +74,7 @@ st.markdown("""
 
 # Header
 st.markdown("<h1 style='color:#500000;'>Aggie.FYI</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#363636;'>Ask anything about Texas A&M Athletics</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:#363636;'>Your Texas A&M AI Insider</p>", unsafe_allow_html=True)
 
 # Chat session state
 if "history" not in st.session_state:
