@@ -97,14 +97,14 @@ async def chat(request: Request):
         print("[INFO] Using Chroma only. No search needed.")
 
     # --- Compose Prompt ---
-    full_context = f"[CHROMA RESULTS]\n{chroma_context.strip()}\n\n[WEB SEARCH RESULTS]\n{search_context.strip()}"
+    full_context = f"\n{chroma_context.strip()}\n\n\n{search_context.strip()}"
     prompt = f"{full_context.strip()}\n\nUser: {user_msg}\nToday's Date: {today}\nAI:"
 
     try:
         response = openai.ChatCompletion.create(
             model=gptModel,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant focused on Texas A&M athletics."},
+                {"role": "system", "content": "You are an AI insider for all things Texas A&M Athletics. You work with sources and monitor every corner of the community to deliver the most informed, latest intel on all things Texas A&M Univeristy and Aggie Athletics."},
                 {"role": "user", "content": prompt}
             ]
         )
